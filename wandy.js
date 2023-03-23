@@ -146,7 +146,7 @@ const witT = wit()
 const tanggalT = tanggal()
 
 if (isCmd) {
-axios.get('https://api.countapi.xyz/hit/StealBot/visits').then(({data}) => hit.all = data.value)
+axios.get('https://api.countapi.xyz/hit/StealBotu/visits').then(({data}) => hit.all = data.value)
 }
 
 function getRandom(ext){
