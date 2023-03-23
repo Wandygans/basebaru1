@@ -11,7 +11,7 @@ global.thumbnailUrl = [
 ]
 
 global.fake = 'Steal-Bot'
-global.sesiSayaMasbro = "wandy";
+global.sesiSayaMasbro = "wandy.json";
 global.packname = 'Zero-Bot'
 global.author = 'Create by: Wandygans'
 global.prefa = ['','!','.','🐦','🐤','🗿']
