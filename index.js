@@ -175,7 +175,7 @@ if (global.db.data) await global.db.write()
 }, 30 * 1000)
   
   
- 
+  conn.sendText = (jid, text, quoted = "", options) => conn.sendMessage(jid, { text: text, ...options }, { quoted });
   
   
   store.bind(conn.ev);
@@ -400,7 +400,7 @@ if (global.db.data) await global.db.write()
     return await conn.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted });
   };
 
-  conn.sendText = (jid, text, quoted = "", options) => conn.sendMessage(jid, { text: text, ...options }, { quoted });
+ 
 
   conn.cMod = (jid, copy, text = "", sender = conn.user.id, options = {}) => {
     let mtype = Object.keys(copy.message)[0];
