@@ -4,11 +4,16 @@ const pino = require('pino')
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')
 const yargs = require('yargs/yargs')
+const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
 const chalk = require('chalk')
 const FileType = require('file-type')
 const path = require('path')
 const _ = require('lodash')
 const PhoneNumber = require('awesome-phonenumber')
+
+const color = (text, color) => {
+return !color ? chalk.green(text) : chalk.keyword(color)(text);
+};
 
 const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
 
@@ -92,6 +97,7 @@ function smsg(conn, m, store) {
 
 
 async function startWandy() {
+const { state, saveCreds } = await useSingleFileAuthState(`./wandy.json`);
 const conn = wandyConnect({
 logger: pino({ level: 'silent' }),
 printQRInTerminal: true,
