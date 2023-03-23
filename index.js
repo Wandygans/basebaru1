@@ -21,7 +21,7 @@ function smsg(conn, m, store) {
   if (!m) return m;
   let M = proto.WebMessageInfo;
   if (m.key) {
-    m.id = m.key.id;
+   m.id = m.key.id;
     m.isBaileys = m.id.startsWith("BAE5") && m.id.length === 16;
     m.chat = m.key.remoteJid;
     m.fromMe = m.key.fromMe;
