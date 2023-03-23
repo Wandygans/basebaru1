@@ -1,27 +1,38 @@
-const { default: wandyConnect, useSingleFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto, getContentType } = require("@adiwajshing/baileys")
-const { state, saveState } = useSingleFileAuthState(`./wandy.json`)
-const pino = require('pino')
-const { Boom } = require('@hapi/boom')
-const fs = require('fs')
-const yargs = require('yargs/yargs')
-const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
-const chalk = require('chalk')
+require('./config')
+const {
+default: wandyConnect,
+useSingleFileAuthState,
+DisconnectReason,
+fetchLatestBaileysVersion,
+makeInMemoryStore,
+jidDecode,
+proto,
+downloadContentFromMessage,
+getContentType,
+} = require("@adiwajshing/baileys");
+const pino = require("pino");
 const FileType = require('file-type')
-const path = require('path')
-const _ = require('lodash')
-const PhoneNumber = require('awesome-phonenumber')
+const yargs = require('yargs/yargs')
+const { Boom } = require("@hapi/boom");
+const fs = require("fs");
+const axios = require("axios");
+const chalk = require("chalk");
+const figlet = require("figlet");
+const _ = require("lodash");
+const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
+const PhoneNumber = require("awesome-phonenumber");
+
+const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
 
 const color = (text, color) => {
 return !color ? chalk.green(text) : chalk.keyword(color)(text);
 };
 
-const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
-
 function smsg(conn, m, store) {
   if (!m) return m;
   let M = proto.WebMessageInfo;
   if (m.key) {
-   m.id = m.key.id;
+    m.id = m.key.id;
     m.isBaileys = m.id.startsWith("BAE5") && m.id.length === 16;
     m.chat = m.key.remoteJid;
     m.fromMe = m.key.fromMe;
@@ -95,17 +106,30 @@ function smsg(conn, m, store) {
   return m;
 }
 
+async function startYoshi() {
+  const { state, saveCreds } = await useSingleFileAuthState(`./${sesiSayaMasbro ? sesiSayaMasbro : "session"}`);
+  const { version, isLatest } = await fetchLatestBaileysVersion();
+  console.log(`Pakai Versi v${version.join(".")}, Terbaru: ${isLatest}`);
+  console.log(
+    color(
+      figlet.textSync("Zero-bot", {
+        font: "Standard",
+        horizontalLayout: "default",
+        vertivalLayout: "default",
+        whitespaceBreak: false,
+      }),
+      "green"
+    )
+  );
 
-async function startWandy() {
-const { state, saveCreds } = await useSingleFileAuthState(`./wandy.json`);
-const conn = wandyConnect({
-logger: pino({ level: 'silent' }),
-printQRInTerminal: true,
-browser: ['WhatsApp Multi Device','Safari','1.0.0'],
-auth: state
-})
-
-var low
+  const conn = wandyConnect({
+    logger: pino({ level: "silent" }),
+    printQRInTerminal: true,
+    browser: ["zero-bot", "Chrome", "5.0.0"],
+    auth: state,
+  });
+  
+ var low
 try {
 low = require('lowdb')
 } catch (e) {
@@ -149,33 +173,14 @@ loadDatabase()
 if (global.db) setInterval(async () => {
 if (global.db.data) await global.db.write()
 }, 30 * 1000)
+  
+  
+ 
+  
+  
+  store.bind(conn.ev);
 
-store.bind(conn.ev)
-
-    conn.ev.on('messages.upsert', async chatUpdate => {
-        //console.log(JSON.stringify(chatUpdate, undefined, 2))
-        try {
-        mek = chatUpdate.messages[0]
-        if (!mek.message) return
-        mek.message = (Object.keys(mek.message)[0] === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
-        if (mek.key && mek.key.remoteJid === 'status@broadcast') return
-        if (!conn.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
-        if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
-        m = smsg(conn, mek, store)
-        require("./wandy")(conn, m, chatUpdate, store)
-        } catch (err) {
-            console.log(err)
-        }
-    })
-    
-    // Group Update
-	function nullish(args) {
-    return !(args !== null && args !== undefined)
-  }
-	
-	 conn.sendText = (jid, text, quoted = "", options) => conn.sendMessage(jid, { text: text, ...options }, { quoted });
-   
-conn.ev.on("messages.upsert", async (chatUpdate) => {
+  conn.ev.on("messages.upsert", async (chatUpdate) => {
     try {
       mek = chatUpdate.messages[0];
       if (!mek.message) return;
@@ -395,7 +400,7 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
     return await conn.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted });
   };
 
- 
+  conn.sendText = (jid, text, quoted = "", options) => conn.sendMessage(jid, { text: text, ...options }, { quoted });
 
   conn.cMod = (jid, copy, text = "", sender = conn.user.id, options = {}) => {
     let mtype = Object.keys(copy.message)[0];
@@ -426,7 +431,7 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
   return conn;
 }
 
-startWandy();
+startYoshi();
 
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
