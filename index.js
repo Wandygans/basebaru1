@@ -99,6 +99,51 @@ browser: ['WhatsApp Multi Device','Safari','1.0.0'],
 auth: state
 })
 
+var low
+try {
+low = require('lowdb')
+} catch (e) {
+low = require('./lib/lowdb')
+}
+
+const { Low, JSONFile } = low
+const mongoDB = require('./lib/mongoDB')
+  
+ global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
+const PORT = process.env.PORT || 3000
+if (opts['server']) require('./server')(conn, PORT)
+	
+global.db = new Low(
+/https?:\/\//.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority' || '') ?
+    new cloudDBAdapter('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') : /mongodb/.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') ?
+      new mongoDB('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') :
+      new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
+)     
+global.DATABASE = global.db // Backwards Compatibility
+global.loadDatabase = async function loadDatabase() {
+if (global.db.READ) return new Promise((resolve) => setInterval(function () { (!global.db.READ ? (clearInterval(this), resolve(global.db.data == null ? global.loadDatabase() : global.db.data)) : null) }, 1 * 1000))
+if (global.db.data !== null) return
+global.db.READ = true
+await global.db.read()
+global.db.READ = false
+global.db.data = {
+users: {},
+chats: {},
+database: {},
+game: {},
+settings: {},
+others: {},
+sticker: {},
+...(global.db.data || {})
+}
+global.db.chain = _.chain(global.db.data)
+}
+loadDatabase()
+
+if (global.db) setInterval(async () => {
+if (global.db.data) await global.db.write()
+}, 30 * 1000)
+
 store.bind(conn.ev)
 
     conn.ev.on('messages.upsert', async chatUpdate => {
@@ -121,6 +166,8 @@ store.bind(conn.ev)
 	function nullish(args) {
     return !(args !== null && args !== undefined)
   }
+	
+	 conn.sendText = (jid, text, quoted = "", options) => conn.sendMessage(jid, { text: text, ...options }, { quoted });
    
 conn.ev.on("messages.upsert", async (chatUpdate) => {
     try {
@@ -342,7 +389,7 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
     return await conn.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted });
   };
 
-  conn.sendText = (jid, text, quoted = "", options) => conn.sendMessage(jid, { text: text, ...options }, { quoted });
+ 
 
   conn.cMod = (jid, copy, text = "", sender = conn.user.id, options = {}) => {
     let mtype = Object.keys(copy.message)[0];
