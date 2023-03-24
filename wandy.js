@@ -2,6 +2,7 @@ require('./config')
 const { BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, proto, generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser, getContentType } = require("@adiwajshing/baileys");
 const fs = require("fs");
 const util = require("util");
+const fetch = require("node-fetch")
 const chalk = require("chalk");
 const ffmpeg = require("fluent-ffmpeg")
 const axios = require('axios')
@@ -255,6 +256,11 @@ anuy = `
 ┌──⭓ *Main Menu*
 │
 │⭔ ${prefix}menu
+│⭔ ${prefix}sc
+│⭔ ${prefix}delete
+│⭔ ${prefix}donasi
+│⭔ ${prefix}owner
+│⭔ ${prefix}fetch
 │⭔ ${prefix}ping
 │
 └───────⭓
@@ -266,6 +272,9 @@ anuy = `
 └───────⭓
 ┌──⭓ *Owner Menu*
 │
+│⭔ ${prefix}nano
+│⭔ ${prefix}leavegc
+│⭔ ${prefix}eval
 │⭔ >
 │⭔ $
 │
@@ -280,6 +289,65 @@ case 'help':
 case 'tes':
 case 'p':
 conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", ["PING", ".ping", "OWNER", ".owner", "DONASI", ".donasi" ], m, { mentions: m.key.participant })
+break
+case 'sc':
+m.reply('Script : https://github.com/DikaArdnt/Hisoka-Morou')
+break
+case 'leavegc':
+if (!isCreator && !m.key.fromMe) throw mess.owner
+conn.groupLeave(from)
+break
+case 'nano':
+if (!isCreator && !m.key.fromMe) throw mess.owner
+if (!q) return reply(`Example : ${prefix + command} index.js`)
+anus = fs.readFileSync(`${q}`)
+m.reply(String(anus))
+break
+case 'eval': {
+if (!isCreator && !m.key.fromMe) return m.reply(mess.owner)
+function Return(sul) {
+sat = JSON.stringify(sul, null, 2)
+bang = util.format(sat)
+if (sat == undefined) {
+bang = util.format(sul)
+}
+return m.reply(bang)
+}
+try {
+m.reply(util.format(eval(`(async () => { return ${budy.slice(3)} })()`)))
+} catch (e) {
+m.reply(String(e))
+}
+}
+break
+case 'donasi':
+m.reply(`Donasi seiklasnya\nPulsa : 082125039170`)
+break
+case 'delete': case 'del': case 'd': {
+if (!m.quoted) throw false
+let { chat, fromMe, id, isBaileys } = m.quoted
+if (!isBaileys) throw 'Pesan tersebut bukan dikirim oleh bot!'
+conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: true, id: m.quoted.id, participant: m.quoted.sender } })
+}
+break
+case 'get':
+case 'fetch':
+if (!q) return m.reply(`Example : #fetch https://youtube.com`)
+fetch(`${q}`).then(res => res.text())  
+.then(bu =>{
+m.reply(bu)
+})   
+break
+case 'owner': case 'creator': {
+let vcard = 'BEGIN:VCARD\n'
++ 'VERSION:3.0\n' 
++ 'N:;Wandy;;;'
++ 'FN:WandyGunawan\n'
++ 'ORG:WandyGans;\n'
++ 'TEL;type=CELL;type=VOICE;waid=6282125039170:+62 821-2503-9170\n' // WhatsApp ID + phone number
++ 'END:VCARD'
+conn.sendMessage(m.chat, { contacts: { displayName: 'Owner - Zero-bot', contacts: [{ vcard }] } }, { quoted: m })
+}
 break
 case 'toimage': case 'toimg':
 try {
