@@ -269,7 +269,7 @@ case 'menu':
 case 'help':
 case 'tes':
 case 'p':
-conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", [".ping", "PING"], m, { mentions: m.key.participant })
+conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", ["PING", ".ping", "OWNER", ".owner", "DONASI", ".donasi" ], m, { mentions: m.key.participant })
 break
 case 'toimage': case 'toimg':
 try {
