@@ -129,14 +129,14 @@ bio = `-`
 	
 function runtime(seconds) {
 seconds = Number(seconds);
-	var d = Math.floor(seconds / (3600 * 24));
-	var h = Math.floor(seconds % (3600 * 24) / 3600);
-	var m = Math.floor(seconds % 3600 / 60);
-	var s = Math.floor(seconds % 60);
+var d = Math.floor(seconds / (3600 * 24));
+var h = Math.floor(seconds % (3600 * 24) / 3600);
+var m = Math.floor(seconds % 3600 / 60);
+var s = Math.floor(seconds % 60);
 var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
 var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-	var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-	var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
 return dDisplay + hDisplay + mDisplay + sDisplay;
 }
 
@@ -157,7 +157,14 @@ function randomkontol(){
 gambar = [
 {'result': 'https://telegra.ph/file/81260a8b9e8cff26d2b48.jpg'},
 {'result': 'https://telegra.ph/file/ac4928f0824a2a0492737.jpg'},
-{'result': 'https://telegra.ph/file/6359b013bc7e52c3b346f.jpg'}
+{'result': 'https://telegra.ph/file/6359b013bc7e52c3b346f.jpg'},
+{'result': 'https://telegra.ph/file/d43c89a5d2da72875ec05.jpg'},
+{'result': 'https://telegra.ph/file/7d6c0e35f9c8f52715541.jpg'},
+{'result': 'https://telegra.ph/file/ef4b742d47e6a9115e2ff.jpg'},
+{'result': 'https://telegra.ph/file/55e5af5f33fbd57104187.jpg'},
+{'result': 'https://telegra.ph/file/af236598456b95884bd15.jpg'},
+{'result': 'https://telegra.ph/file/de92ed4a729887ffc974c.jpg'},
+{'result': 'https://telegra.ph/file/00ce42a193b1dbbf907d4.jpg'}
 ]
 randomnya = gambar[Math.floor(Math.random() * gambar.length)]
 resultnya = randomnya.result
@@ -200,26 +207,25 @@ async function ppwa(conn, m) {
 let font = await jimp.loadFont('./name.fnt'), 
 mask = await jimp.read('https://i.imgur.com/552kzaW.png'), 
 welcome = await jimp.read(randomkontol()),  
-     avatar = await jimp.read(await conn.profilePictureUrl(m.sender, 'image').catch(() => 'https://telegra.ph/file/24fa902ead26340f3df2c.png')), 
-     status = (await conn.fetchStatus(m.sender).catch(console.log) || {}).status?.slice(0, 30) || 'Not Detected' 
+avatar = await jimp.read(await conn.profilePictureUrl(m.sender, 'image').catch(() => 'https://telegra.ph/file/24fa902ead26340f3df2c.png')), 
+status = (await conn.fetchStatus(m.sender).catch(console.log) || {}).status?.slice(0, 30) || 'Not Detected' 
   
-     await avatar.resize(460, 460) 
-     await mask.resize(460, 460) 
-     await avatar.mask(mask) 
-     await welcome.resize(welcome.getWidth(), welcome.getHeight()) 
+await avatar.resize(460, 460) 
+await mask.resize(460, 460) 
+await avatar.mask(mask) 
+await welcome.resize(welcome.getWidth(), welcome.getHeight()) 
 
-     await welcome.print(font, 550, 180, 'Name:') 
-     await welcome.print(font, 650, 255, pushName.slice(0, 25)) 
-     await welcome.print(font, 550, 340, 'About:') 
-     await welcome.print(font, 650, 415, status) 
-     await welcome.print(font, 550, 500, 'Number:') 
-     await welcome.print(font, 650, 575, PhoneNumber('+' + m.sender.split('@')[0]).getNumber('international')) 
-     return await welcome.composite(avatar, 50, 170).getBufferAsync('image/png') 
- }
+await welcome.print(font, 550, 180, 'Name:') 
+await welcome.print(font, 650, 255, pushName.slice(0, 25)) 
+await welcome.print(font, 550, 340, 'About:') 
+await welcome.print(font, 650, 415, status) 
+await welcome.print(font, 550, 500, 'Number:') 
+await welcome.print(font, 650, 575, PhoneNumber('+' + m.sender.split('@')[0]).getNumber('international')) 
+return await welcome.composite(avatar, 50, 170).getBufferAsync('image/png') 
+}
 
 anuy = `
 *${ucapan}, ${pushName}* 👋
-
 ──⭓ *BOT INFORMATION*
 👑 Creator : WandyGans
 🤖 Bot Name : Zero - Bot
@@ -227,32 +233,27 @@ anuy = `
 🌝 Hit Today : ${hit_today.length}
 🌎 Hit All : ${jumlahCommand}
 📶 Speed : ${sped.toFixed(4)} _Second_
-
 ──⭓ *DATE INFORMATION*
 📆 Hari : ${week} ${weton}
 📆 Tanggal : ${tanggalT}
 ⏰ Time : ${wibT} *WIB*
 ⏰ Time : ${witaT} *WITA*
 ⏰ Time : ${witT} *WIT*
-
 ──⭓ *USER INFORMATION*
 ▢ *Name* : *${pushName}*
 ▢ *Bio* : *${bio}*
-
 ┌──⭓ *Main Menu*
 │
 │⭔ ${prefix}menu
 │⭔ ${prefix}ping
 │
 └───────⭓
-
 ┌──⭓ *Sticker Menu*
 │
 │⭔ ${prefix}sticker
 │⭔ ${prefix}toimg
 │
 └───────⭓
-
 ┌──⭓ *Owner Menu*
 │
 │⭔ >
@@ -268,17 +269,7 @@ case 'menu':
 case 'help':
 case 'tes':
 case 'p':
-let buttonss = [
-{ buttonId: `.ping`, buttonText: { displayText: 'PING' }, type: 1 }
-]
-let buttonMzessage = {
-image: await conn.resize(await ppwa(conn, m), 300, 180),
-caption: anuy,
-footer: fake,
-buttons: buttonss,
-headerType: 4
-}
-conn.sendMessage(m.chat, buttonMzessage,  { ephemeralExpiration: 604800 }, { quoted: m, mentions: m.key.participant })
+conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", [".ping", "PING"], m, { mentions: m.key.participant })
 break
 case 'toimage': case 'toimg':
 try {
@@ -301,13 +292,10 @@ let latensi = speed() - timestamp
 let all = require('util').inspect(hit.all)
 respon = `
 Kecepatan Respon ${latensi.toFixed(4)} _Second_ \n\nRuntime : ${runtime(process.uptime())}
-
 💻 Info Server
 RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
-
 _NodeJS Memory Usaage_
 ${Object.keys(used).map((key, _, arr) => `${key.padEnd(Math.max(...arr.map(v=>v.length)),' ')}: ${formatp(used[key])}`).join('\n')}
-
 ${cpus[0] ? `_Total CPU Usage_
 ${cpus[0].model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}
 _CPU Core(s) Usage (${cpus.length} Core CPU)_
@@ -315,7 +303,6 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
 `.trim()
 m.reply(respon)
 }
-
 break
 case 'sticker': case 's': case 'stickergif': case 'sgif': case 'stiker': {
 if (!quoted) throw `Balas Video/Image Dengan Caption ${prefix + command}`
@@ -336,6 +323,7 @@ throw `Kirim Gambar/Video Dengan Caption ${prefix + command}\nDurasi Video 1-9 D
 break
 		
 default:
+
 if (budy.includes('>')) {
 if (!isCreator) return 
 try {
