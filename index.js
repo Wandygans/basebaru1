@@ -1,6 +1,5 @@
 require('./config') 
 const { default: connConnect, useSingleFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto, getContentType } = require("@adiwajshing/baileys")
-const { state, saveState } = useSingleFileAuthState(`./wandy.json`)
 const pino = require('pino')
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')
@@ -59,6 +58,7 @@ if (global.db.data) await global.db.write()
 }, 30 * 1000)
 
 async function startconn() {
+const { state, saveState } = await useSingleFileAuthState(`./wandy.json`)await 
 const conn = connConnect({
 logger: pino({ level: 'silent' }),
 printQRInTerminal: true,
