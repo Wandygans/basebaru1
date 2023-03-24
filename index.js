@@ -1,4 +1,13 @@
-const { default: wandyConnect, useSingleFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto } = require("@adiwajshing/baileys")
+const {
+  default: wandyConnect,
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion,
+  makeInMemoryStore,
+  jidDecode,
+  proto,
+  getContentType,
+} = require("@adiwajshing/baileys");
 const { state, saveState } = useSingleFileAuthState(`./wandy.json`)
 const pino = require('pino')
 const { Boom } = require('@hapi/boom')
@@ -98,6 +107,10 @@ printQRInTerminal: true,
 browser: ['WhatsApp Multi Device','Safari','1.0.0'],
 auth: state
 })
+
+function nullish(args) {
+    return !(args !== null && args !== undefined)
+  }
 
 store.bind(conn.ev)
 
@@ -490,6 +503,76 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
 
         return proto.WebMessageInfo.fromObject(copy)
     }
+    
+    conn.send5tombol = async (jid, text = '', footer = '', buffer, url, urlText, call, callText, buttons, quoted, options = {}) =>{
+                let type
+                if (buffer) try { (type = await hisoka.getFile(buffer), buffer = type.data) } catch { buffer = buffer }
+                if (buffer && !Buffer.isBuffer(buffer) && (typeof buffer === 'string' || Array.isArray(buffer))) (options = quoted, quoted = buttons, buttons = callText, callText = call, call = urlText, urlText = url, url = buffer, buffer = null)
+                if (!options) options = {}
+                let templateButtons = []
+                if (url || urlText) {
+                    if (!Array.isArray(url)) url = [url]
+                    if (!Array.isArray(urlText)) urlText = [urlText]
+                    templateButtons.push(...(
+                        url.map((v, i) => [v, urlText[i]])
+                            .map(([url, urlText], i) => ({
+                                index: templateButtons.length + i + 1,
+                                urlButton: {
+                                    displayText: !nullish(urlText) && urlText || !nullish(url) && url || '',
+                                    url: !nullish(url) && url || !nullish(urlText) && urlText || ''
+                                }
+                            })) || []
+                    ))
+                }
+                if (call || callText) {
+                    if (!Array.isArray(call)) call = [call]
+                    if (!Array.isArray(callText)) callText = [callText]
+                    templateButtons.push(...(
+                        call.map((v, i) => [v, callText[i]])
+                            .map(([call, callText], i) => ({
+                                index: templateButtons.length + i + 1,
+                                callButton: {
+                                    displayText: !nullish(callText) && callText || !nullish(call) && call || '',
+                                    phoneNumber: !nullish(call) && call || !nullish(callText) && callText || ''
+                                }
+                            })) || []
+                    ))
+                }
+                if (buttons.length) {
+                    if (!Array.isArray(buttons[0])) buttons = [buttons]
+                    templateButtons.push(...(
+                        buttons.map(([text, id], index) => ({
+                            index: templateButtons.length + index + 1,
+                            quickReplyButton: {
+                                displayText: !nullish(text) && text || !nullish(id) && id || '',
+                                id: !nullish(id) && id || !nullish(text) && text || ''
+                            }
+                        })) || []
+                    ))
+                }
+                let message = {
+                    ...options,
+                    [buffer ? 'caption' : 'text']: text || '',
+                    footer,
+                    templateButtons,
+                    ...(buffer ?
+                        options.asLocation && /image/.test(type.mime) ? {
+                            location: {
+                                ...options,
+                                jpegThumbnail: buffer
+                            }
+                        } : {
+                            [/video/.test(type.mime) ? 'video' : /image/.test(type.mime) ? 'image' : 'document']: buffer
+                        } : {})
+                }
+                return await conn.sendMessage(jid, message, {
+                    quoted,
+                    upload: conn.waUploadToServer,
+                   ephemeralExpiration: 604800,
+                    ...options
+                })
+          }
+
 
 
     /**
