@@ -246,68 +246,8 @@ if (global.db.data) await global.db.write()
           : store.contacts[id] || {};
     return (withoutContact ? "" : v.name) || v.subject || v.verifiedName || PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international");
   };
-
-  conn.setStatus = (status) => {
-    conn.query({
-      tag: "iq",
-      attrs: {
-        to: "@s.whatsapp.net",
-        type: "set",
-        xmlns: "status",
-      },
-      content: [
-        {
-          tag: "status",
-          attrs: {},
-          content: Buffer.from(status, "utf-8"),
-        },
-      ],
-    });
-    return status;
-  };
-
-  conn.public = true;
-
-  conn.serializeM = (m) => smsg(conn, m, store);
-  conn.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect } = update;
-    if (connection === "close") {
-      let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-      if (reason === DisconnectReason.badSession) {
-        console.log(`Sesion Rusak, Scan Ulang Masbro`);
-        process.exit();
-      } else if (reason === DisconnectReason.connectionClosed) {
-        console.log("Terputus, Menghubungkan ulang....");
-        startYoshi();
-      } else if (reason === DisconnectReason.connectionLost) {
-        console.log("Terputus Dari Server, Menghubungkan ulang...");
-        startYoshi();
-      } else if (reason === DisconnectReason.connectionReplaced) {
-        console.log("Koneksi Ditimpa, Ada Sesion Baru, Restart aja masbro");
-        process.exit();
-      } else if (reason === DisconnectReason.loggedOut) {
-        console.log(`Logout, Hapus Session Lama "conn.json", scan lagi`);
-        process.exit();
-      } else if (reason === DisconnectReason.restartRequired) {
-        console.log("Harus restart, Restart...");
-        startYoshi();
-      } else if (reason === DisconnectReason.timedOut) {
-        console.log("Koneksi Time Out, Menghubungkan ulang...");
-        startYoshi();
-      } else {
-        console.log(`Gak tau kenapa: ${reason}|${connection}`);
-        startYoshi();
-      }
-    } else if (connection === "open") {
-      console.log(color("Bot sukses konek ke server", "green"));
-      console.log(color("Donasi kreator pulsa: 082125039170", "yellow"));
-      conn.sendMessage("6282125039170@s.whatsapp.net", { text: `Bot hidup masbro, base masih tes` });
-    }
-  });
-
-  conn.ev.on("creds.update", saveCreds);
-
-  const getBuffer = async (url, options) => {
+	
+ const getBuffer = async (url, options) => {
     try {
       options ? options : {};
       const res = await axios({
@@ -429,6 +369,68 @@ if (global.db.data) await global.db.write()
   };
 
   return conn;
+
+  conn.setStatus = (status) => {
+    conn.query({
+      tag: "iq",
+      attrs: {
+        to: "@s.whatsapp.net",
+        type: "set",
+        xmlns: "status",
+      },
+      content: [
+        {
+          tag: "status",
+          attrs: {},
+          content: Buffer.from(status, "utf-8"),
+        },
+      ],
+    });
+    return status;
+  };
+
+  conn.public = true;
+
+  conn.serializeM = (m) => smsg(conn, m, store);
+  conn.ev.on("connection.update", async (update) => {
+    const { connection, lastDisconnect } = update;
+    if (connection === "close") {
+      let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
+      if (reason === DisconnectReason.badSession) {
+        console.log(`Sesion Rusak, Scan Ulang Masbro`);
+        process.exit();
+      } else if (reason === DisconnectReason.connectionClosed) {
+        console.log("Terputus, Menghubungkan ulang....");
+        startYoshi();
+      } else if (reason === DisconnectReason.connectionLost) {
+        console.log("Terputus Dari Server, Menghubungkan ulang...");
+        startYoshi();
+      } else if (reason === DisconnectReason.connectionReplaced) {
+        console.log("Koneksi Ditimpa, Ada Sesion Baru, Restart aja masbro");
+        process.exit();
+      } else if (reason === DisconnectReason.loggedOut) {
+        console.log(`Logout, Hapus Session Lama "conn.json", scan lagi`);
+        process.exit();
+      } else if (reason === DisconnectReason.restartRequired) {
+        console.log("Harus restart, Restart...");
+        startYoshi();
+      } else if (reason === DisconnectReason.timedOut) {
+        console.log("Koneksi Time Out, Menghubungkan ulang...");
+        startYoshi();
+      } else {
+        console.log(`Gak tau kenapa: ${reason}|${connection}`);
+        startYoshi();
+      }
+    } else if (connection === "open") {
+      console.log(color("Bot sukses konek ke server", "green"));
+      console.log(color("Donasi kreator pulsa: 082125039170", "yellow"));
+      conn.sendMessage("6282125039170@s.whatsapp.net", { text: `Bot hidup masbro, base masih tes` });
+    }
+  });
+
+  conn.ev.on("creds.update", saveCreds);
+
+ 
 }
 
 startYoshi();
