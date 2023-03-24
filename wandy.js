@@ -273,6 +273,7 @@ anuy = `
 ┌──⭓ *Groups Menu*
 │
 │⭔ ${prefix}setsubject
+│⭔ ${prefix}tagall
 │
 └───────⭓
 ┌──⭓ *Owner Menu*
@@ -293,7 +294,20 @@ case 'menu':
 case 'help':
 case 'tes':
 case 'p':
-conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", ["PING", ".ping", "OWNER", ".owner", "DONASI", ".donasi" ], m, { mentions: m.key.participant })
+conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", ["PING", ".ping", "OWNER", ".owner", "DONASI", ".donasi" ], m)
+break
+case 'tagall': {
+if (!m.isGroup) throw mess.group
+if (!isBotAdmins) throw mess.botAdmin
+if (!isAdmins) throw mess.admin
+let teks = `══✪〘 *👥 Tag All* 〙✪══
+ 
+➲ *Pesan : ${q ? q : 'kosong'}*\n\n`
+for (let mem of participants) {
+teks += `⭔ @${mem.id.split('@')[0]}\n`
+ }
+conn.sendMessage(m.chat, { text: teks, mentions: participants.map(a => a.id) }, { quoted: m })
+}
 break
 case 'sc':
 m.reply('Script : https://github.com/DikaArdnt/Hisoka-Morou')
