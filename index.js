@@ -58,7 +58,7 @@ if (global.db.data) await global.db.write()
 }, 30 * 1000)
 
 async function startconn() {
-const { state, saveState } = await useSingleFileAuthState(`./wandy.json`)await 
+const { state, saveState } = await useSingleFileAuthState(`./wandy.json`)
 const conn = connConnect({
 logger: pino({ level: 'silent' }),
 printQRInTerminal: true,
