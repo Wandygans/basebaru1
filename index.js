@@ -1,5 +1,15 @@
 require('./config')
-const { default: connConnect, useSingleFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto } = require("@adiwajshing/baileys")
+const {
+default: connConnect,
+useSingleFileAuthState,
+DisconnectReason,
+fetchLatestBaileysVersion,
+makeInMemoryStore,
+jidDecode,
+proto,
+downloadContentFromMessage,
+getContentType,
+} = require("@adiwajshing/baileys");
 const { state, saveState } = useSingleFileAuthState(`./wandy.json`)
 const pino = require('pino')
 const { Boom } = require('@hapi/boom')
