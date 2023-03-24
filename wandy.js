@@ -274,6 +274,16 @@ anuy = `
 │
 │⭔ ${prefix}setsubject
 │⭔ ${prefix}tagall
+│⭔ ${prefix}hidetag
+│⭔ ${prefix}add
+│⭔ ${prefix}kick
+│⭔ ${prefix}promote
+│⭔ ${prefix}demote
+│⭔ ${prefix}tagme
+│⭔ ${prefix}listadmin
+│⭔ ${prefix}group
+│⭔ ${prefix}setdesc
+│⭔ ${prefix}linkgroup
 │
 └───────⭓
 ┌──⭓ *Owner Menu*
@@ -296,6 +306,108 @@ case 'tes':
 case 'p':
 conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", ["PING", ".ping", "OWNER", ".owner", "DONASI", ".donasi" ], m)
 break
+case 'setdesc': case 'setdesk': {
+if (!m.isGroup) throw mess.group
+if (!isBotAdmins) throw mess.botAdmin
+if (!isAdmins) throw mess.admin
+if (!text) throw `Example: ${prefix + command} Welcome`
+await conn.groupUpdateDescription(m.chat, text).then((res) => m.reply(mess.success)).catch((err) => m.reply(jsonformat(err)))
+}
+break
+case 'linkgroup': case 'linkgc': {
+if (!m.isGroup) throw mess.group
+if (!isBotAdmins && !m.key.fromMe) throw mess.botAdmin
+let response = await hisoka.groupInviteCode(m.chat)
+conn.sendText(m.chat, `https://chat.whatsapp.com/${response}\n\nLink Group : ${groupMetadata.subject}`, m, { detectLink: true })
+}
+break
+case 'group': case 'grup': {
+if (!m.isGroup) throw mess.group
+if (!isBotAdmins && !m.key.fromMe) throw mess.botAdmin
+if (!isAdmins && !m.key.fromMe) throw mess.admin
+if (!text) throw `Masukkan value open/close\nContoh : #grup buka`
+if (args[0].toLowerCase() === 'close') {
+await conn.groupSettingUpdate(m.chat, 'announcement').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+} else if (args[0].toLowerCase() === 'open') {
+await conn.groupSettingUpdate(m.chat, 'not_announcement').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+}
+}
+break
+case 'tagme':
+if (!m.isGroup) throw mess.group
+var num = m.sender
+conn.sendMessage(m.chat, {text: `@${num.split("@")[0]} Tag!`, contextInfo: { mentionedJid: [num]}}, {quoted: m})
+break
+case 'listadmins':
+case 'listadmin':
+case 'admin':
+if (!m.isGroup) return m.reply(mess.group)
+teks2 = `List admin group *${groupMetadata.subject}*\nTotal : ${groupAdmins.length}\n\n`
+no = 0
+for (let admon of groupAdmins) {
+no += 1
+teks2 += `[${no.toString()}] @${admon.split('@')[0]}\n`
+}
+conn.sendTextWithMentions(m.chat, teks2, m)
+break
+case 'promote': {
+		if (!m.isGroup) throw mess.group
+                if (!isBotAdmins) throw mess.botAdmin
+                if (!isAdmins) throw mess.admin
+		let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
+		await conn.groupParticipantsUpdate(m.chat, [users], 'promote').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+	}
+	break
+	case 'demote': {
+		if (!m.isGroup) throw mess.group
+                if (!isBotAdmins) throw mess.botAdmin
+                if (!isAdmins) throw mess.admin
+		let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
+		await conn.groupParticipantsUpdate(m.chat, [users], 'demote').then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+	}
+	break
+case 'kick':
+if (!m.isGroup) throw mess.group
+                if (!isBotAdmins) throw mess.botAdmin
+                if (!isAdmins) throw mess.admin
+    var number;
+    if (mentioned.length !== 0) {
+      number = mentioned[0]
+      conn.groupParticipantsUpdate(m.chat, [number], "remove")
+      .then( res => reply(jsonformat(res)))
+      .catch( err => reply(jsonformat(err)))
+    } else if (isQuotedMsg) {
+      number = quotedMsg.sender
+      conn.groupParticipantsUpdate(m.chat, [number], "remove")
+      .then( res => m.reply(jsonformat(res)))
+      .catch( err =>m. reply(jsonformat(err)))
+    } else {
+    m.reply(`Tag atau balas pesan member yang ingin dikeluarkan dari grup`)
+    }
+    break
+case 'add':
+if (!m.isGroup) throw mess.group
+                if (!isBotAdmins) throw mess.botAdmin
+                if (!isAdmins) throw mess.admin
+    var number;
+    if (args[1]) {
+      number = mentioned[0]
+      var cek = await conn.onWhatsApp(number)
+      if (cek.length == 0) return m.reply(`Masukkan nomer yang valid dan terdaftar di WhatsApp`)
+      conn.groupParticipantsUpdate(m.chat, [number], "add")
+      .then( res => m.reply(jsonformat(res)))
+      .catch( err => m.reply(jsonformat(err)))
+    } else if (isQuotedMsg) {
+      number = quotedMsg.sender
+      var cek = await conn.onWhatsApp(number)
+      if (cek.length == 0) return m.reply(`Member yang kamu balas pesannya sudah tidak terdaftar di WhatsApp`)
+      conn.groupParticipantsUpdate(m.chat, [number], "add")
+      .then( res => m.reply(jsonformat(res)))
+      .catch( err => m.reply(jsonformat(err)))
+    } else {
+      m.reply(`Kirim perintah ${command} nomer atau balas pesan orang yang ingin dimasukkan kedalam grup`)
+    }
+    break
 case 'tagall': {
 if (!m.isGroup) throw mess.group
 if (!isBotAdmins) throw mess.botAdmin
@@ -308,6 +420,12 @@ teks += `⭔ @${mem.id.split('@')[0]}\n`
  }
 conn.sendMessage(m.chat, { text: teks, mentions: participants.map(a => a.id) }, { quoted: m })
 }
+break
+case 'hidetag':
+if (!m.isGroup) throw mess.group
+if (!isBotAdmins) throw mess.botAdmin
+if (!isAdmins) throw mess.admin
+hisoka.sendMessage(m.chat, { text : q ? q : '' , mentions: participants.map(a => a.id)}, { quoted: m })
 break
 case 'sc':
 m.reply('Script : https://github.com/DikaArdnt/Hisoka-Morou')
