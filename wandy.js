@@ -270,6 +270,11 @@ anuy = `
 │⭔ ${prefix}toimg
 │
 └───────⭓
+┌──⭓ *Groups Menu*
+│
+│⭔ ${prefix}setsubject
+│
+└───────⭓
 ┌──⭓ *Owner Menu*
 │
 │⭔ ${prefix}nano
@@ -296,6 +301,14 @@ break
 case 'leavegc':
 if (!isCreator && !m.key.fromMe) throw mess.owner
 conn.groupLeave(from)
+break
+case 'setname': case 'setsubject': {
+if (!m.isGroup) throw mess.group
+if (!isBotAdmins && !m.key.fromMe) throw mess.botAdmin
+if (!isAdmins && !m.key.fromMe) throw mess.admin
+if (!q) throw `Example : ${prefix + command} Wibu`
+await conn.groupUpdateSubject(m.chat, text).then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+}
 break
 case 'nano':
 if (!isCreator && !m.key.fromMe) throw mess.owner
