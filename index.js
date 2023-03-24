@@ -1,6 +1,6 @@
 require('./config') 
 const {
-default: connConnect,
+default: wandyConnect,
 useSingleFileAuthState,
 DisconnectReason,
 fetchLatestBaileysVersion,
@@ -67,9 +67,9 @@ if (global.db) setInterval(async () => {
 if (global.db.data) await global.db.write()
 }, 30 * 1000)
 
-async function startconn() {
+async function startWandy() {
 const { state, saveState } = await useSingleFileAuthState(`./wandy.json`)
-const conn = connConnect({
+const conn = wandyConnect({
 logger: pino({ level: 'silent' }),
 printQRInTerminal: true,
 browser: ['WhatsApp Multi Device','Safari','1.0.0'],
@@ -236,12 +236,12 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
         if (connection === 'close') {
         let reason = new Boom(lastDisconnect?.error)?.output.statusCode
             if (reason === DisconnectReason.badSession) { console.log(`Bad Session File, Please Delete Session and Scan Again`); conn.logout(); }
-            else if (reason === DisconnectReason.connectionClosed) { console.log("Connection closed, reconnecting...."); startconn(); }
-            else if (reason === DisconnectReason.connectionLost) { console.log("Connection Lost from Server, reconnecting..."); startconn(); }
+            else if (reason === DisconnectReason.connectionClosed) { console.log("Connection closed, reconnecting...."); startWandy(); }
+            else if (reason === DisconnectReason.connectionLost) { console.log("Connection Lost from Server, reconnecting..."); startWandy(); }
             else if (reason === DisconnectReason.connectionReplaced) { console.log("Connection Replaced, Another New Session Opened, Please Close Current Session First"); conn.logout(); }
             else if (reason === DisconnectReason.loggedOut) { console.log(`Device Logged Out, Please Scan Again And Run.`); conn.logout(); }
-            else if (reason === DisconnectReason.restartRequired) { console.log("Restart Required, Restarting..."); startconn(); }
-            else if (reason === DisconnectReason.timedOut) { console.log("Connection TimedOut, Reconnecting..."); startconn(); }
+            else if (reason === DisconnectReason.restartRequired) { console.log("Restart Required, Restarting..."); startWandy(); }
+            else if (reason === DisconnectReason.timedOut) { console.log("Connection TimedOut, Reconnecting..."); startWandy(); }
             else conn.end(`Unknown DisconnectReason: ${reason}|${connection}`)
         }
         console.log('Connected...', update)
@@ -635,7 +635,7 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
 return conn
 }
 
-startconn()
+startWandy()
 
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
