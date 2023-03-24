@@ -104,7 +104,7 @@ await conn.updateBlockStatus(callerId, "block")
         if (!conn.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
         if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
         m = smsg(conn, mek, store)
-        require("./conn")(conn, m, chatUpdate, store)
+        require("./wandy")(conn, m, chatUpdate, store)
         } catch (err) {
             console.log(err)
         }
