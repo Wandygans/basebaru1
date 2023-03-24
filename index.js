@@ -1,13 +1,5 @@
-const {
-  default: wandyConnect,
-  useSingleFileAuthState,
-  DisconnectReason,
-  fetchLatestBaileysVersion,
-  makeInMemoryStore,
-  jidDecode,
-  proto,
-  getContentType,
-} = require("@adiwajshing/baileys");
+require('./config')
+const { default: connConnect, useSingleFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto } = require("@adiwajshing/baileys")
 const { state, saveState } = useSingleFileAuthState(`./wandy.json`)
 const pino = require('pino')
 const { Boom } = require('@hapi/boom')
@@ -17,101 +9,79 @@ const chalk = require('chalk')
 const FileType = require('file-type')
 const path = require('path')
 const _ = require('lodash')
-const PhoneNumber = require('awesome-phonenumber')
+const PhoneNumber = require('awesome-phonenumber')w
+const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
+const { smsg, isUrl, generateMessageTag, getBuffer, getSizeMedia, fetchJson, await, sleep } = require('./lib/myfunc')
 
-const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
-
-function smsg(conn, m, store) {
-  if (!m) return m;
-  let M = proto.WebMessageInfo;
-  if (m.key) {
-    m.id = m.key.id;
-    m.isBaileys = m.id.startsWith("BAE5") && m.id.length === 16;
-    m.chat = m.key.remoteJid;
-    m.fromMe = m.key.fromMe;
-    m.isGroup = m.chat.endsWith("@g.us");
-    m.sender = conn.decodeJid((m.fromMe && conn.user.id) || m.participant || m.key.participant || m.chat || "");
-    if (m.isGroup) m.participant = conn.decodeJid(m.key.participant) || "";
-  }
-  if (m.message) {
-    m.mtype = getContentType(m.message);
-    m.msg = m.mtype == "viewOnceMessage" ? m.message[m.mtype].message[getContentType(m.message[m.mtype].message)] : m.message[m.mtype];
-    m.body =
-      m.message.conversation ||
-      m.msg.caption ||
-      m.msg.text ||
-      (m.mtype == "listResponseMessage" && m.msg.singleSelectReply.selectedRowId) ||
-      (m.mtype == "buttonsResponseMessage" && m.msg.selectedButtonId) ||
-      (m.mtype == "viewOnceMessage" && m.msg.caption) ||
-      m.text;
-    let quoted = (m.quoted = m.msg.contextInfo ? m.msg.contextInfo.quotedMessage : null);
-    m.mentionedJid = m.msg.contextInfo ? m.msg.contextInfo.mentionedJid : [];
-    if (m.quoted) {
-      let type = getContentType(quoted);
-      m.quoted = m.quoted[type];
-      if (["productMessage"].includes(type)) {
-        type = getContentType(m.quoted);
-        m.quoted = m.quoted[type];
-      }
-      if (typeof m.quoted === "string")
-        m.quoted = {
-          text: m.quoted,
-        };
-      m.quoted.mtype = type;
-      m.quoted.id = m.msg.contextInfo.stanzaId;
-      m.quoted.chat = m.msg.contextInfo.remoteJid || m.chat;
-      m.quoted.isBaileys = m.quoted.id ? m.quoted.id.startsWith("BAE5") && m.quoted.id.length === 16 : false;
-      m.quoted.sender = conn.decodeJid(m.msg.contextInfo.participant);
-      m.quoted.fromMe = m.quoted.sender === conn.decodeJid(conn.user.id);
-      m.quoted.text = m.quoted.text || m.quoted.caption || m.quoted.conversation || m.quoted.contentText || m.quoted.selectedDisplayText || m.quoted.title || "";
-      m.quoted.mentionedJid = m.msg.contextInfo ? m.msg.contextInfo.mentionedJid : [];
-      m.getQuotedObj = m.getQuotedMessage = async () => {
-        if (!m.quoted.id) return false;
-        let q = await store.loadMessage(m.chat, m.quoted.id, conn);
-        return exports.smsg(conn, q, store);
-      };
-      let vM = (m.quoted.fakeObj = M.fromObject({
-        key: {
-          remoteJid: m.quoted.chat,
-          fromMe: m.quoted.fromMe,
-          id: m.quoted.id,
-        },
-        message: quoted,
-        ...(m.isGroup ? { participant: m.quoted.sender } : {}),
-      }));
-
-      m.quoted.delete = () => conn.sendMessage(m.quoted.chat, { delete: vM.key });
-
-      m.quoted.copyNForward = (jid, forceForward = false, options = {}) => conn.copyNForward(jid, vM, forceForward, options);
-
-      m.quoted.download = () => conn.downloadMediaMessage(m.quoted);
-    }
-  }
-  if (m.msg.url) m.download = () => conn.downloadMediaMessage(m.msg);
-  m.text = m.msg.text || m.msg.caption || m.message.conversation || m.msg.contentText || m.msg.selectedDisplayText || m.msg.title || "";
-  
-  m.reply = (text, chatId = m.chat, options = {}) => (Buffer.isBuffer(text) ? conn.sendMedia(chatId, text, "file", "", m, { ...options }) : conn.sendText(chatId, text, m, { ...options }));
-  
-  m.copy = () => exports.smsg(conn, M.fromObject(M.toObject(m)));
-
-  m.copyNForward = (jid = m.chat, forceForward = false, options = {}) => conn.copyNForward(jid, m, forceForward, options);
-
-  return m;
+var low
+try {
+low = require('lowdb')
+} catch (e) {
+low = require('./lib/lowdb')
 }
 
-async function startWandy() {
-const conn = wandyConnect({
+const { Low, JSONFile } = low
+const mongoDB = require('./lib/mongoDB')
+
+const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
+ 
+global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
+global.db = new Low(
+/https?:\/\//.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority' || '') ?
+    new cloudDBAdapter('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') : /mongodb/.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') ?
+      new mongoDB('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') :
+      new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
+)     
+global.DATABASE = global.db // Backwards Compatibility
+global.loadDatabase = async function loadDatabase() {
+if (global.db.READ) return new Promise((resolve) => setInterval(function () { (!global.db.READ ? (clearInterval(this), resolve(global.db.data == null ? global.loadDatabase() : global.db.data)) : null) }, 1 * 1000))
+if (global.db.data !== null) return
+global.db.READ = true
+await global.db.read()
+global.db.READ = false
+global.db.data = {
+users: {},
+chats: {},
+database: {},
+game: {},
+settings: {},
+others: {},
+sticker: {},
+...(global.db.data || {})
+}
+global.db.chain = _.chain(global.db.data)
+}
+loadDatabase()
+
+if (global.db) setInterval(async () => {
+if (global.db.data) await global.db.write()
+}, 30 * 1000)
+
+async function startconn() {
+const conn = connConnect({
 logger: pino({ level: 'silent' }),
 printQRInTerminal: true,
 browser: ['WhatsApp Multi Device','Safari','1.0.0'],
 auth: state
 })
 
-function nullish(args) {
+store.bind(conn.ev)
+
+const PORT = process.env.PORT || 3003
+if (opts['server']) require('./server')(conn, PORT)
+    
+conn.ws.on('CB:call', async (json) => {
+const callerId = json.content[0].attrs['call-creator']
+if (json.content[0].tag == 'offer') {
+let pa7rick = await conn.sendContact(callerId, global.owner)
+conn.sendMessage(callerId, { text: `Sistem otomatis block!\nJangan menelpon bot!\nAnda sudah tidak dapat menggunakan bot!`}, { quoted : pa7rick })
+await sleep(8000)
+await conn.updateBlockStatus(callerId, "block")
+}
+})
+  function nullish(args) {
     return !(args !== null && args !== undefined)
   }
-
-store.bind(conn.ev)
 
     conn.ev.on('messages.upsert', async chatUpdate => {
         //console.log(JSON.stringify(chatUpdate, undefined, 2))
@@ -123,14 +93,68 @@ store.bind(conn.ev)
         if (!conn.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
         if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
         m = smsg(conn, mek, store)
-        require("./wandy")(conn, m, chatUpdate, store)
+        require("./conn")(conn, m, chatUpdate, store)
         } catch (err) {
             console.log(err)
         }
     })
     
     // Group Update
-   
+    conn.ev.on('groups.update', async pea => {
+       //console.log(pea)
+    // Get Profile Picture Group
+       try {
+       ppgc = await conn.profilePictureUrl(pea[0].id, 'image')
+       } catch {
+       ppgc = 'https://shortlink.connarridho.my.id/rg1oT'
+       }
+       let wm_fatih = { url : ppgc }
+       if (pea[0].announce == true) {
+       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nGroup telah ditutup oleh admin, Sekarang hanya admin yang dapat mengirim pesan !`, `Group Settings Change`, wm_fatih, [])
+       } else if(pea[0].announce == false) {
+       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nGroup telah dibuka oleh admin, Sekarang peserta dapat mengirim pesan !`, `Group Settings Change`, wm_fatih, [])
+       } else if (pea[0].restrict == true) {
+       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nInfo group telah dibatasi, Sekarang hanya admin yang dapat mengedit info group !`, `Group Settings Change`, wm_fatih, [])
+       } else if (pea[0].restrict == false) {
+       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nInfo group telah dibuka, Sekarang peserta dapat mengedit info group !`, `Group Settings Change`, wm_fatih, [])
+       } else {
+       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nGroup Subject telah diganti menjadi *${pea[0].subject}*`, `Group Settings Change`, wm_fatih, [])
+     }
+    })
+
+conn.ev.on('group-participants.update', async (anu) => {
+console.log(anu)
+try {
+let metadata = await conn.groupMetadata(anu.id)
+let participants = anu.participants
+for (let num of participants) {
+ 
+try {
+ppuser = await conn.profilePictureUrl(num, 'image')
+} catch {
+ppuser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+}
+
+try {
+ppgroup = await conn.profilePictureUrl(anu.id, 'image')
+} catch {
+ppgroup = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+}
+
+let groupDesc = metadata.desc
+let tes = groupDesc.toString('utf-8')
+
+if (anu.action == 'add') {
+conn.sendMessage(anu.id, { image: { url: ppuser }, contextInfo: { mentionedJid: [num] }, caption: `Hi @${num.split("@")[0]}👋\nWelcome To ${metadata.subject}\n\n${tes}` })
+} else if (anu.action == 'remove') {
+conn.sendMessage(anu.id, { image: { url: ppuser }, contextInfo: { mentionedJid: [num] }, caption: `@${num.split("@")[0]} Leaving To ${metadata.subject}` })
+}
+}
+} catch (err) {
+console.log(err)
+}
+})
+	
 conn.decodeJid = (jid) => {
 if (!jid) return jid
 if (/:\d+@/gi.test(jid)) {
@@ -201,12 +225,12 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
         if (connection === 'close') {
         let reason = new Boom(lastDisconnect?.error)?.output.statusCode
             if (reason === DisconnectReason.badSession) { console.log(`Bad Session File, Please Delete Session and Scan Again`); conn.logout(); }
-            else if (reason === DisconnectReason.connectionClosed) { console.log("Connection closed, reconnecting...."); startWandy(); }
-            else if (reason === DisconnectReason.connectionLost) { console.log("Connection Lost from Server, reconnecting..."); startWandy(); }
+            else if (reason === DisconnectReason.connectionClosed) { console.log("Connection closed, reconnecting...."); startconn(); }
+            else if (reason === DisconnectReason.connectionLost) { console.log("Connection Lost from Server, reconnecting..."); startconn(); }
             else if (reason === DisconnectReason.connectionReplaced) { console.log("Connection Replaced, Another New Session Opened, Please Close Current Session First"); conn.logout(); }
             else if (reason === DisconnectReason.loggedOut) { console.log(`Device Logged Out, Please Scan Again And Run.`); conn.logout(); }
-            else if (reason === DisconnectReason.restartRequired) { console.log("Restart Required, Restarting..."); startWandy(); }
-            else if (reason === DisconnectReason.timedOut) { console.log("Connection TimedOut, Reconnecting..."); startWandy(); }
+            else if (reason === DisconnectReason.restartRequired) { console.log("Restart Required, Restarting..."); startconn(); }
+            else if (reason === DisconnectReason.timedOut) { console.log("Connection TimedOut, Reconnecting..."); startconn(); }
             else conn.end(`Unknown DisconnectReason: ${reason}|${connection}`)
         }
         console.log('Connected...', update)
@@ -239,6 +263,75 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
             }), options)
             conn.relayMessage(jid, template.message, { messageId: template.key.id })
     }
+
+  conn.send5tombol = async (jid, text = '', footer = '', buffer, url, urlText, call, callText, buttons, quoted, options = {}) =>{
+                let type
+                if (buffer) try { (type = await conn.getFile(buffer), buffer = type.data) } catch { buffer = buffer }
+                if (buffer && !Buffer.isBuffer(buffer) && (typeof buffer === 'string' || Array.isArray(buffer))) (options = quoted, quoted = buttons, buttons = callText, callText = call, call = urlText, urlText = url, url = buffer, buffer = null)
+                if (!options) options = {}
+                let templateButtons = []
+                if (url || urlText) {
+                    if (!Array.isArray(url)) url = [url]
+                    if (!Array.isArray(urlText)) urlText = [urlText]
+                    templateButtons.push(...(
+                        url.map((v, i) => [v, urlText[i]])
+                            .map(([url, urlText], i) => ({
+                                index: templateButtons.length + i + 1,
+                                urlButton: {
+                                    displayText: !nullish(urlText) && urlText || !nullish(url) && url || '',
+                                    url: !nullish(url) && url || !nullish(urlText) && urlText || ''
+                                }
+                            })) || []
+                    ))
+                }
+                if (call || callText) {
+                    if (!Array.isArray(call)) call = [call]
+                    if (!Array.isArray(callText)) callText = [callText]
+                    templateButtons.push(...(
+                        call.map((v, i) => [v, callText[i]])
+                            .map(([call, callText], i) => ({
+                                index: templateButtons.length + i + 1,
+                                callButton: {
+                                    displayText: !nullish(callText) && callText || !nullish(call) && call || '',
+                                    phoneNumber: !nullish(call) && call || !nullish(callText) && callText || ''
+                                }
+                            })) || []
+                    ))
+                }
+                if (buttons.length) {
+                    if (!Array.isArray(buttons[0])) buttons = [buttons]
+                    templateButtons.push(...(
+                        buttons.map(([text, id], index) => ({
+                            index: templateButtons.length + index + 1,
+                            quickReplyButton: {
+                                displayText: !nullish(text) && text || !nullish(id) && id || '',
+                                id: !nullish(id) && id || !nullish(text) && text || ''
+                            }
+                        })) || []
+                    ))
+                }
+                let message = {
+                    ...options,
+                    [buffer ? 'caption' : 'text']: text || '',
+                    footer,
+                    templateButtons,
+                    ...(buffer ?
+                        options.asLocation && /image/.test(type.mime) ? {
+                            location: {
+                                ...options,
+                                jpegThumbnail: buffer
+                            }
+                        } : {
+                            [/video/.test(type.mime) ? 'video' : /image/.test(type.mime) ? 'image' : 'document']: buffer
+                        } : {})
+                }
+                return await conn.sendMessage(jid, message, {
+                    quoted,
+                    upload: conn.waUploadToServer,
+                   ephemeralExpiration: 604800,
+                    ...options
+                })
+          }
 
     /**
      * 
@@ -502,76 +595,6 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
 
         return proto.WebMessageInfo.fromObject(copy)
     }
-    
-    conn.send5tombol = async (jid, text = '', footer = '', buffer, url, urlText, call, callText, buttons, quoted, options = {}) =>{
-                let type
-                if (buffer) try { (type = await hisoka.getFile(buffer), buffer = type.data) } catch { buffer = buffer }
-                if (buffer && !Buffer.isBuffer(buffer) && (typeof buffer === 'string' || Array.isArray(buffer))) (options = quoted, quoted = buttons, buttons = callText, callText = call, call = urlText, urlText = url, url = buffer, buffer = null)
-                if (!options) options = {}
-                let templateButtons = []
-                if (url || urlText) {
-                    if (!Array.isArray(url)) url = [url]
-                    if (!Array.isArray(urlText)) urlText = [urlText]
-                    templateButtons.push(...(
-                        url.map((v, i) => [v, urlText[i]])
-                            .map(([url, urlText], i) => ({
-                                index: templateButtons.length + i + 1,
-                                urlButton: {
-                                    displayText: !nullish(urlText) && urlText || !nullish(url) && url || '',
-                                    url: !nullish(url) && url || !nullish(urlText) && urlText || ''
-                                }
-                            })) || []
-                    ))
-                }
-                if (call || callText) {
-                    if (!Array.isArray(call)) call = [call]
-                    if (!Array.isArray(callText)) callText = [callText]
-                    templateButtons.push(...(
-                        call.map((v, i) => [v, callText[i]])
-                            .map(([call, callText], i) => ({
-                                index: templateButtons.length + i + 1,
-                                callButton: {
-                                    displayText: !nullish(callText) && callText || !nullish(call) && call || '',
-                                    phoneNumber: !nullish(call) && call || !nullish(callText) && callText || ''
-                                }
-                            })) || []
-                    ))
-                }
-                if (buttons.length) {
-                    if (!Array.isArray(buttons[0])) buttons = [buttons]
-                    templateButtons.push(...(
-                        buttons.map(([text, id], index) => ({
-                            index: templateButtons.length + index + 1,
-                            quickReplyButton: {
-                                displayText: !nullish(text) && text || !nullish(id) && id || '',
-                                id: !nullish(id) && id || !nullish(text) && text || ''
-                            }
-                        })) || []
-                    ))
-                }
-                let message = {
-                    ...options,
-                    [buffer ? 'caption' : 'text']: text || '',
-                    footer,
-                    templateButtons,
-                    ...(buffer ?
-                        options.asLocation && /image/.test(type.mime) ? {
-                            location: {
-                                ...options,
-                                jpegThumbnail: buffer
-                            }
-                        } : {
-                            [/video/.test(type.mime) ? 'video' : /image/.test(type.mime) ? 'image' : 'document']: buffer
-                        } : {})
-                }
-                return await conn.sendMessage(jid, message, {
-                    quoted,
-                    upload: conn.waUploadToServer,
-                   ephemeralExpiration: 604800,
-                    ...options
-                })
-          }
-
 
 
     /**
@@ -601,7 +624,7 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
 return conn
 }
 
-startWandy()
+startconn()
 
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
@@ -610,4 +633,3 @@ console.log(chalk.redBright(`Update ${__filename}`))
 delete require.cache[file]
 require(file)
 })
-
