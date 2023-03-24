@@ -1,4 +1,4 @@
-global.owner = ['6282125039170']
+global.owner = ['6282125039170', '6281318565558']
 global.fake = 'Steal-Bot'
 global.sesi = "wandy.json";
 global.packname = 'Zero-Bot'
