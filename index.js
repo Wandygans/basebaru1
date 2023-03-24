@@ -1,6 +1,6 @@
 const {
   default: wandyConnect,
-  useMultiFileAuthState,
+  useSingleFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeInMemoryStore,
