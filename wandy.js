@@ -226,22 +226,32 @@ return await welcome.composite(avatar, 50, 170).getBufferAsync('image/png')
 
 anuy = `
 *${ucapan}, ${pushName}* 👋
+
 ──⭓ *BOT INFORMATION*
+
 👑 Creator : WandyGans
 🤖 Bot Name : Zero - Bot
 📍 Prefix : 「 Multi Prefix 」
 🌝 Hit Today : ${hit_today.length}
 🌎 Hit All : ${jumlahCommand}
 📶 Speed : ${sped.toFixed(4)} _Second_
+
 ──⭓ *DATE INFORMATION*
+
 📆 Hari : ${week} ${weton}
 📆 Tanggal : ${tanggalT}
+
+──⭓ *TIME INFORMATION*
+
 ⏰ Time : ${wibT} *WIB*
 ⏰ Time : ${witaT} *WITA*
 ⏰ Time : ${witT} *WIT*
+
 ──⭓ *USER INFORMATION*
+
 ▢ *Name* : *${pushName}*
 ▢ *Bio* : *${bio}*
+
 ┌──⭓ *Main Menu*
 │
 │⭔ ${prefix}menu
