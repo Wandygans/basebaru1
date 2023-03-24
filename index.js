@@ -21,7 +21,6 @@ const PhoneNumber = require('awesome-phonenumber')
 
 const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
 
-
 function smsg(conn, m, store) {
   if (!m) return m;
   let M = proto.WebMessageInfo;
