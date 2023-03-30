@@ -131,14 +131,13 @@ for (let num of participants) {
 try {
 ppuser = await conn.profilePictureUrl(num, 'image')
 } catch {
-ppuser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+ppuser = '../media/avatar_contact'
 }
 
 try {
 ppgroup = await conn.profilePictureUrl(anu.id, 'image')
 } catch {
-ppgroup = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
-}
+ppgroup = '../media/avatar_contact
 
 let groupDesc = metadata.desc
 let tes = groupDesc.toString('utf-8')
