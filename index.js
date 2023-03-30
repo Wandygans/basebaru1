@@ -38,9 +38,9 @@ const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
 global.db = new Low(
 /https?:\/\//.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority' || '') ?
-    new cloudDBAdapter('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') : /mongodb/.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') ?
-      new mongoDB('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') :
-      new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
+new cloudDBAdapter('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') : /mongodb/.test('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') ?
+new mongoDB('mongodb://stealbotda:wandyganteng123@ac-np3spgr-shard-00-00.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-01.knbmqh7.mongodb.net:27017,ac-np3spgr-shard-00-02.knbmqh7.mongodb.net:27017/?ssl=true&replicaSet=atlas-a0cefe-shard-0&authSource=admin&retryWrites=true&w=majority') :
+new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
 )     
 global.DATABASE = global.db // Backwards Compatibility
 global.loadDatabase = async function loadDatabase() {
@@ -81,18 +81,6 @@ store.bind(conn.ev)
 const PORT = process.env.PORT || 3003
 if (opts['server']) require('./server')(conn, PORT)
     
-conn.ws.on('CB:call', async (json) => {
-const callerId = json.content[0].attrs['call-creator']
-if (json.content[0].tag == 'offer') {
-let pa7rick = await conn.sendContact(callerId, global.owner)
-conn.sendMessage(callerId, { text: `Sistem otomatis block!\nJangan menelpon bot!\nAnda sudah tidak dapat menggunakan bot!`}, { quoted : pa7rick })
-await sleep(8000)
-await conn.updateBlockStatus(callerId, "block")
-}
-})
-  function nullish(args) {
-    return !(args !== null && args !== undefined)
-  }
 
     conn.ev.on('messages.upsert', async chatUpdate => {
         //console.log(JSON.stringify(chatUpdate, undefined, 2))
@@ -249,191 +237,30 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
 
     conn.ev.on('creds.update', saveState)
 
-    // Add Other
-    /** Send Button 5 Image
-     *
-     * @param {*} jid
-     * @param {*} text
-     * @param {*} footer
-     * @param {*} image
-     * @param [*] button
-     * @param {*} options
-     * @returns
-     */
-    conn.send5ButImg = async (jid , text = '' , footer = '', img, but = [], options = {}) =>{
-        let message = await prepareWAMessageMedia({ image: img }, { upload: conn.waUploadToServer })
-        var template = generateWAMessageFromContent(m.chat, proto.Message.fromObject({
-        templateMessage: {
-        hydratedTemplate: {
-        imageMessage: message.imageMessage,
-               "hydratedContentText": text,
-               "hydratedFooterText": footer,
-               "hydratedButtons": but
-            }
-            }
-            }), options)
-            conn.relayMessage(jid, template.message, { messageId: template.key.id })
-    }
-
-  conn.send5tombol = async (jid, text = '', footer = '', buffer, url, urlText, call, callText, buttons, quoted, options = {}) =>{
-                let type
-                if (buffer) try { (type = await conn.getFile(buffer), buffer = type.data) } catch { buffer = buffer }
-                if (buffer && !Buffer.isBuffer(buffer) && (typeof buffer === 'string' || Array.isArray(buffer))) (options = quoted, quoted = buttons, buttons = callText, callText = call, call = urlText, urlText = url, url = buffer, buffer = null)
-                if (!options) options = {}
-                let templateButtons = []
-                if (url || urlText) {
-                    if (!Array.isArray(url)) url = [url]
-                    if (!Array.isArray(urlText)) urlText = [urlText]
-                    templateButtons.push(...(
-                        url.map((v, i) => [v, urlText[i]])
-                            .map(([url, urlText], i) => ({
-                                index: templateButtons.length + i + 1,
-                                urlButton: {
-                                    displayText: !nullish(urlText) && urlText || !nullish(url) && url || '',
-                                    url: !nullish(url) && url || !nullish(urlText) && urlText || ''
-                                }
-                            })) || []
-                    ))
-                }
-                if (call || callText) {
-                    if (!Array.isArray(call)) call = [call]
-                    if (!Array.isArray(callText)) callText = [callText]
-                    templateButtons.push(...(
-                        call.map((v, i) => [v, callText[i]])
-                            .map(([call, callText], i) => ({
-                                index: templateButtons.length + i + 1,
-                                callButton: {
-                                    displayText: !nullish(callText) && callText || !nullish(call) && call || '',
-                                    phoneNumber: !nullish(call) && call || !nullish(callText) && callText || ''
-                                }
-                            })) || []
-                    ))
-                }
-                if (buttons.length) {
-                    if (!Array.isArray(buttons[0])) buttons = [buttons]
-                    templateButtons.push(...(
-                        buttons.map(([text, id], index) => ({
-                            index: templateButtons.length + index + 1,
-                            quickReplyButton: {
-                                displayText: !nullish(text) && text || !nullish(id) && id || '',
-                                id: !nullish(id) && id || !nullish(text) && text || ''
-                            }
-                        })) || []
-                    ))
-                }
-                let message = {
-                    ...options,
-                    [buffer ? 'caption' : 'text']: text || '',
-                    footer,
-                    templateButtons,
-                    ...(buffer ?
-                        options.asLocation && /image/.test(type.mime) ? {
-                            location: {
-                                ...options,
-                                jpegThumbnail: buffer
-                            }
-                        } : {
-                            [/video/.test(type.mime) ? 'video' : /image/.test(type.mime) ? 'image' : 'document']: buffer
-                        } : {})
-                }
-                return await conn.sendMessage(jid, message, {
-                    quoted,
-                    upload: conn.waUploadToServer,
-                   ephemeralExpiration: 604800,
-                    ...options
-                })
-          }
-
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} buttons 
-     * @param {*} caption 
-     * @param {*} footer 
-     * @param {*} quoted 
-     * @param {*} options 
-     */
-    conn.sendButtonText = (jid, buttons = [], text, footer, quoted = '', options = {}) => {
-        let buttonMessage = {
-            text,
-            footer,
-            buttons,
-            headerType: 2,
-            ...options
-        }
-        conn.sendMessage(jid, buttonMessage, { quoted, ...options })
-    }
-    
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} text 
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
+  
     conn.sendText = (jid, text, quoted = '', options) => conn.sendMessage(jid, { text: text, ...options }, { quoted })
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} path 
-     * @param {*} caption 
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
+  
     conn.sendImage = async (jid, path, caption = '', quoted = '', options) => {
 	let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
         return await conn.sendMessage(jid, { image: buffer, caption: caption, ...options }, { quoted })
     }
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} path 
-     * @param {*} caption 
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
     conn.sendVideo = async (jid, path, caption = '', quoted = '', gif = false, options) => {
         let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
         return await conn.sendMessage(jid, { video: buffer, caption: caption, gifPlayback: gif, ...options }, { quoted })
     }
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} path 
-     * @param {*} quoted 
-     * @param {*} mime 
-     * @param {*} options 
-     * @returns 
-     */
+  
     conn.sendAudio = async (jid, path, quoted = '', ptt = false, options) => {
         let buffer = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
         return await conn.sendMessage(jid, { audio: buffer, ptt: ptt, ...options }, { quoted })
     }
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} text 
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
+   
     conn.sendTextWithMentions = async (jid, text, quoted, options = {}) => conn.sendMessage(jid, { text: text, contextInfo: { mentionedJid: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net') }, ...options }, { quoted })
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} path 
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
+   
     conn.sendImageAsSticker = async (jid, path, quoted, options = {}) => {
         let buff = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
         let buffer
@@ -447,14 +274,7 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
         return buffer
     }
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} path 
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
+     
     conn.sendVideoAsSticker = async (jid, path, quoted, options = {}) => {
         let buff = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0)
         let buffer
@@ -467,14 +287,7 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
         await conn.sendMessage(jid, { sticker: { url: buffer }, ...options }, { quoted })
         return buffer
     }
-	
-    /**
-     * 
-     * @param {*} message 
-     * @param {*} filename 
-     * @param {*} attachExtension 
-     * @returns 
-     */
+
     conn.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => {
         let quoted = message.msg ? message.msg : message
         let mime = (message.msg || message).mimetype || ''
@@ -503,16 +316,7 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
 	return buffer
      } 
     
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} path 
-     * @param {*} filename
-     * @param {*} caption
-     * @param {*} quoted 
-     * @param {*} options 
-     * @returns 
-     */
+   
     conn.sendMedia = async (jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
         let types = await conn.getFile(path, true)
            let { mime, ext, res, data, filename } = types
@@ -538,14 +342,7 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
        return fs.promises.unlink(pathFile)
        }
 
-    /**
-     * 
-     * @param {*} jid 
-     * @param {*} message 
-     * @param {*} forceForward 
-     * @param {*} options 
-     * @returns 
-     */
+   
     conn.copyNForward = async (jid, message, forceForward = false, options = {}) => {
         let vtype
 		if (options.readViewOnce) {
@@ -608,11 +405,6 @@ if (store && store.contacts) store.contacts[id] = { id, name: contact.notify }
     }
 
 
-    /**
-     * 
-     * @param {*} path 
-     * @returns 
-     */
     conn.getFile = async (PATH, save) => {
         let res
         let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split`,`[1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? (filename = PATH, fs.readFileSync(PATH)) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
