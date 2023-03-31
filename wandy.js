@@ -436,6 +436,7 @@ if (!isBotAdmins && !m.key.fromMe) throw mess.botAdmin
 if (!isAdmins && !m.key.fromMe) throw mess.admin
 if (!q) throw `Example : ${prefix + command} Wibu`
 await conn.groupUpdateSubject(m.chat, text).then((res) => m.reply(jsonformat(res))).catch((err) => m.reply(jsonformat(err)))
+await reply('Berhasil mengganti nama group menjadi: ${q}')
 }
 break
 case 'nano':
