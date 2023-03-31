@@ -173,7 +173,7 @@ return resultnya
 }
 
 function reply(text){
-conn.sendMessage(id, { text: text })
+conn.sendMessage(m.chat, { text: text })
 }
 
 const used = process.memoryUsage()
