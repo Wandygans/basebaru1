@@ -229,7 +229,7 @@ await welcome.print(font, 650, 575, PhoneNumber('+' + m.sender.split('@')[0]).ge
 return await welcome.composite(avatar, 50, 170).getBufferAsync('image/png') 
 }
 
-anuy = `
+/*
 *${ucapan}, ${pushName}* 👋
 
 ──⭓ *BOT INFORMATION*
@@ -256,49 +256,44 @@ anuy = `
 
 ▢ *Name* : *${pushName}*
 ▢ *Bio* : *${bio}*
+*/
+	
+anuy = `
 
-┌──⭓ *Main Menu*
-│
-│⭔ ${prefix}menu
-│⭔ ${prefix}sc
-│⭔ ${prefix}delete
-│⭔ ${prefix}donasi
-│⭔ ${prefix}owner
-│⭔ ${prefix}fetch
-│⭔ ${prefix}ping
-│
-└───────⭓
-┌──⭓ *Sticker Menu*
-│
-│⭔ ${prefix}sticker
-│⭔ ${prefix}toimg
-│
-└───────⭓
-┌──⭓ *Groups Menu*
-│
-│⭔ ${prefix}setsubject
-│⭔ ${prefix}tagall
-│⭔ ${prefix}hidetag
-│⭔ ${prefix}add
-│⭔ ${prefix}kick
-│⭔ ${prefix}promote
-│⭔ ${prefix}demote
-│⭔ ${prefix}tagme
-│⭔ ${prefix}listadmin
-│⭔ ${prefix}group
-│⭔ ${prefix}setdesc
-│⭔ ${prefix}linkgroup
-│
-└───────⭓
-┌──⭓ *Owner Menu*
-│
-│⭔ ${prefix}nano
-│⭔ ${prefix}leavegc
-│⭔ ${prefix}eval
-│⭔ >
-│⭔ $
-│
-└───────⭓
+</> Main Menu
+⭔ ${prefix}menu
+⭔ ${prefix}sc
+⭔ ${prefix}delete
+⭔ ${prefix}donasi
+⭔ ${prefix}owner
+⭔ ${prefix}fetch
+⭔ ${prefix}ping
+
+</> Sticker Menu
+⭔ ${prefix}sticker
+⭔ ${prefix}toimg
+
+</> Group Menu
+⭔ ${prefix}setsubject
+⭔ ${prefix}tagall
+⭔ ${prefix}hidetag
+⭔ ${prefix}add
+⭔ ${prefix}kick
+⭔ ${prefix}promote
+⭔ ${prefix}demote
+⭔ ${prefix}tagme
+⭔ ${prefix}listadmin
+⭔ ${prefix}group
+⭔ ${prefix}setdesc
+⭔ ${prefix}linkgroup
+
+</> Owner Menu
+⭔ ${prefix}nano
+⭔ ${prefix}leavegc
+⭔ ${prefix}eval
+⭔ >
+⭔ $
+
 `
 
 //━━━━━━━━━━━━━━━[ COMMAND ]━━━━━━━━━━━━━━━━━//
