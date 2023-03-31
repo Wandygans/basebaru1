@@ -13,5 +13,5 @@ owner: 'Fitur Khusus Owner Bot',
 group: 'Fitur Digunakan Hanya Untuk Group!',
 private: 'Fitur Digunakan Hanya Untuk Private Chat!',
 bot: 'Fitur Khusus Pengguna Nomor Bot',
-wait: '*_Wait a minute_*'
+wait: 'Sedang di proses...'
 }
