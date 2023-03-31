@@ -109,7 +109,7 @@ if (opts['server']) require('./server')(conn, PORT)
        }
        let wm_fatih = { url : ppgc }
        if (pea[0].announce == true) {
-      conn.sendMessage(m.chat, { text: '「 Group Settings 」\n\nGroup telah ditutup oleh admin, Sekarang hanya admin yang dapat mengirim pesan ! })`
+      conn.sendMessage(m.chat, { text: '「 Group Settings 」\n\nGroup telah ditutup oleh admin, Sekarang hanya admin yang dapat mengirim pesan !' })
        } else if(pea[0].announce == false) {
        conn.sendMessage(m.chat, { text: `「 Group Settings 」\n\nGroup telah dibuka oleh admin, Sekarang peserta dapat mengirim pesan !` })
        } else if (pea[0].restrict == true) {
