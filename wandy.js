@@ -305,10 +305,7 @@ anuy = `
  
 switch (command) {
 case 'menu':
-case 'help':
-case 'tes':
-case 'p':
-conn.send5tombol(m.chat , anuy, fake, await conn.resize(await ppwa(conn, m), 300, 180), "gaada", "Website", "6282125039170", "Owner", ["PING", ".ping", "OWNER", ".owner", "DONASI", ".donasi" ], m)
+reply(anuy)
 break
 case 'setdesc': case 'setdesk': {
 if (!m.isGroup) throw mess.group
