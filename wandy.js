@@ -172,7 +172,7 @@ resultnya = randomnya.result
 return resultnya
 }
 
-function reply(text)
+function reply(text){
 conn.sendMessage(id, { text: text })
 }
 
