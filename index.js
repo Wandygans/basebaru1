@@ -137,7 +137,7 @@ ppuser = '../media/avatar_contact'
 try {
 ppgroup = await conn.profilePictureUrl(anu.id, 'image')
 } catch {
-ppgroup = '../media/avatar_contact
+ppgroup = '../media/avatar_contact'
 
 let groupDesc = metadata.desc
 let tes = groupDesc.toString('utf-8')
