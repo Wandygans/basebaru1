@@ -172,6 +172,10 @@ resultnya = randomnya.result
 return resultnya
 }
 
+function reply(text)
+conn.sendMessage(id, { text: text })
+}
+
 const used = process.memoryUsage()
 const cpus = os.cpus().map(cpu => {
 cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0)
