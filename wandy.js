@@ -103,6 +103,10 @@ resolve(ab)
 })
 }
 
+jsonformat = (string) => {
+return JSON.stringify(string, null, 2)
+}
+
 if (isCmd && !m.isGroup) {
 console.log(chalk.black(chalk.bgWhite("[ JEJAK ]")), color(argsLog, "turquoise"), chalk.magenta("Dari"), chalk.green(pushName), chalk.yellow(`[ ${sender.replace("@s.whatsapp.net", "")} ]`));
 } else if (isCmd && m.isGroup) {
