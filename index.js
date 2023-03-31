@@ -109,15 +109,15 @@ if (opts['server']) require('./server')(conn, PORT)
        }
        let wm_fatih = { url : ppgc }
        if (pea[0].announce == true) {
-       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nGroup telah ditutup oleh admin, Sekarang hanya admin yang dapat mengirim pesan !`, `Group Settings Change`, wm_fatih, [])
+      conn.sendMessage(m.chat, { text: '「 Group Settings 」\n\nGroup telah ditutup oleh admin, Sekarang hanya admin yang dapat mengirim pesan ! })`
        } else if(pea[0].announce == false) {
-       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nGroup telah dibuka oleh admin, Sekarang peserta dapat mengirim pesan !`, `Group Settings Change`, wm_fatih, [])
+       conn.sendMessage(m.chat, { text: `「 Group Settings 」\n\nGroup telah dibuka oleh admin, Sekarang peserta dapat mengirim pesan !` })
        } else if (pea[0].restrict == true) {
-       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nInfo group telah dibatasi, Sekarang hanya admin yang dapat mengedit info group !`, `Group Settings Change`, wm_fatih, [])
+         conn.sendMessage(m.chat, { text: `「 Group Settings 」\n\nInfo group telah dibatasi, Sekarang hanya admin yang dapat mengedit info group !`})
        } else if (pea[0].restrict == false) {
-       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nInfo group telah dibuka, Sekarang peserta dapat mengedit info group !`, `Group Settings Change`, wm_fatih, [])
+         conn.sendMessage(m.chat, { text: `「 Group Settings 」\n\nInfo group telah dibuka, Sekarang peserta dapat mengedit info group !`})
        } else {
-       conn.send5ButImg(pea[0].id, `「 Group Settings 」\n\nGroup Subject telah diganti menjadi *${pea[0].subject}*`, `Group Settings Change`, wm_fatih, [])
+        conn.sendMessage(m.chat, { text:  `「 Group Settings 」\n\nGroup Subject telah diganti menjadi *${pea[0].subject}*`})
      }
     })
 
